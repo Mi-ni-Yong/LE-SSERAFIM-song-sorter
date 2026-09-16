@@ -4,158 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LE SSERAFIM Song Sorter</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        /* PUREFLOW Minimal & Fluid 테마 */
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         body {
-            font-family: 'Pretendard', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #333;
-            background: linear-gradient(-45deg, #fdfbfb, #f0f4f8, #fceef5, #e0f2fe);
-            background-size: 400% 400%;
-            animation: gradientFlow 15s ease infinite;
+            color: #f0f0f0;
+            background: #111216; 
         }
 
         #container {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 20px 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 20px 50px rgba(100, 110, 140, 0.08);
+            background: #1a1b20;
+            padding: 30px 25px;
+            border-radius: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5); 
             width: 100%;
             max-width: 800px;
             text-align: center;
+            position: relative;
         }
 
-        /* 르세라핌 정체성 강조 타이틀 */
+        /* === 팝업 모달창 디자인 (절대 좌표로 쏠림 완전 차단) === */
+        #custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999; /* 다른 모든 요소보다 최상단에 배치 */
+            inset: 0; /* top: 0, left: 0, right: 0, bottom: 0 완벽 커버 */
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+        }
+        #custom-modal.active {
+            display: block; /* flex 대신 block을 사용하여 절대 좌표 적용 */
+        }
+        .modal-box {
+            position: absolute;
+            top: 15vh; /* 화면 상단에서 15% 띄움 */
+            left: 50%;
+            transform: translateX(-50%); /* 가로 완벽하게 정중앙 고정 */
+            margin: 0; 
+            background: #1a1b20;
+            padding: 25px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: popDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popDown {
+            0% { top: 10vh; opacity: 0; }
+            100% { top: 15vh; opacity: 1; }
+        }
+        .modal-box h3 { margin-top: 5px; margin-bottom: 10px; color: #fff; font-size: 18px; font-weight: 800; }
+        .modal-box p { font-size: 13px; color: #aaa; margin-bottom: 25px; word-break: keep-all; line-height: 1.4; }
+        .modal-btn {
+            width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; 
+            font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-yes { background: linear-gradient(90deg, #52d89e, #f76be1); color: #000; }
+        .btn-yes:hover { opacity: 0.9; filter: brightness(1.1); }
+        .btn-no { background: rgba(255,255,255,0.08); color: #ccc; margin-bottom: 0; }
+        .btn-no:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+        .theme-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #52d89e 0%, #f76be1 100%);
+            color: #000;
+            padding: 4px 14px;
+            border-radius: 30px; 
+            font-size: 11px;
+            font-weight: 800; 
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
         h1 {
             margin-top: 0;
-            margin-bottom: 0;
-            font-size: 30px;
+            margin-bottom: 5px;
+            font-size: 38px;
             font-weight: 900;
             letter-spacing: 1px;
-            color: #111;
-        }
-
-        .subtitle {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 5px;
-            color: #888;
-            margin-bottom: 5px;
             text-transform: uppercase;
         }
 
         .logo-text {
-            background: linear-gradient(90deg, #9bbde8 0%, #ffafbd 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: #79a7d3; 
+            color: #ffffff;
+            text-shadow: 0px 3px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .subtitle {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: #999;
+            margin-bottom: 20px;
         }
 
         .version-info {
             display: block;
-            color: #ff8fa3;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            line-height: 1.6;
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
 
         #phase-title {
             font-size: 13px;
             font-weight: 800;
-            color: #ff8fa3;
-            margin-bottom: 10px;
-            background: rgba(255, 175, 189, 0.15);
+            color: #000;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #52d89e 0%, #f76be1 100%);
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 6px 18px;
+            border-radius: 20px; 
             letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s;
         }
         
-        /* 진행률 바 */
         .progress-wrapper {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: left;
         }
         .progress-text-box {
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            color: #888;
-            margin-bottom: 5px;
+            color: #aaa;
+            margin-bottom: 6px;
             letter-spacing: 1px;
         }
         .progress-bar-bg {
-            background: rgba(0, 0, 0, 0.05);
-            height: 5px;
-            border-radius: 3px;
-            overflow: hidden;
+            background: rgba(0, 0, 0, 0.4);
+            height: 6px;
+            border-radius: 3px; 
             width: 100%;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
         }
         .progress-bar-fill {
-            background: linear-gradient(90deg, #ffc3a0 0%, #ffafbd 100%);
+            background: linear-gradient(90deg, #52d89e 0%, #f76be1 100%);
             height: 100%;
             width: 0%;
             border-radius: 3px;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* 배틀 버튼 */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: translateY(3px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeInScale 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
         .battle-box {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 15px;
         }
+        
         .choice-btn {
             flex: 1;
             min-height: 120px;
-            padding: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
+            padding: 15px;
+            font-size: clamp(14px, 3.5vw, 17px);
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 12px; 
+            background: rgba(255,255,255,0.02);
+            color: #fff;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             word-break: keep-all;
             line-height: 1.4;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-        }
-        .choice-btn:hover {
-            transform: translateY(-3px);
-            border-color: #ffafbd;
-            background: #fff;
-            color: #ff8fa3;
-            box-shadow: 0 10px 20px rgba(255, 175, 189, 0.2);
+            font-family: inherit;
         }
         
-        /* 유틸리티 버튼 */
         .utility-box {
             display: flex;
             gap: 10px;
@@ -163,177 +209,210 @@
             margin-bottom: 10px;
         }
         .util-btn {
-            padding: 8px 16px;
+            padding: 8px 18px;
             font-size: 12px;
             font-weight: 600;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 16px;
-            background-color: rgba(255, 255, 255, 0.5);
-            color: #666;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px; 
+            background-color: transparent;
+            color: #999;
             cursor: pointer;
             transition: all 0.2s;
-        }
-        .util-btn:hover {
-            background-color: #fff;
-            color: #111;
-            border-color: #ccc;
+            font-family: inherit;
         }
         
-        /* 메인 버튼 */
         .start-btn {
-            padding: 12px 30px;
+            flex: 1;
+            padding: 14px 20px;
             font-size: 14px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
-            color: white;
+            font-weight: 700;
+            background: #fff;
+            color: #000;
             border: none;
-            border-radius: 25px;
+            border-radius: 25px; 
             cursor: pointer;
             transition: all 0.3s;
             letter-spacing: 1px;
-            box-shadow: 0 5px 12px rgba(255, 175, 189, 0.4);
-        }
-        .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(255, 175, 189, 0.6);
-        }
-        .disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            pointer-events: none;
+            font-family: inherit;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        /* 결과 리스트 레이아웃 */
+        .save-btn {
+            background: linear-gradient(90deg, #52d89e 0%, #f76be1 100%);
+            color: #000;
+            font-weight: 800;
+        }
+
+        @media (hover: hover) {
+            .choice-btn:hover { border-color: rgba(82, 216, 158, 0.4); background: rgba(82, 216, 158, 0.05); transform: translateY(-2px); }
+            .util-btn:hover { background-color: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.3); }
+            .start-btn:hover { background: #ddd; transform: translateY(-2px); }
+            .save-btn:hover { background: linear-gradient(90deg, #42c88e 0%, #e75bd1 100%); }
+            .result-item:hover { background: rgba(255,255,255,0.08); transform: translateX(3px); }
+        }
+
+        @media (max-width: 650px) {
+            .choice-btn { background: rgba(255,255,255,0.04); box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); }
+            #container { padding: 25px 15px; } 
+            .action-buttons-wrap { flex-direction: column; } 
+        }
+
+        .disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+        
+        /* === 결과창 좌우 분할 레이아웃 === */
         .result-wrapper {
             display: flex;
-            gap: 15px; 
+            flex-direction: row; 
+            gap: 20px; 
             width: 100%;
             margin-top: 10px;
+            align-items: flex-start;
         }
+        
         .result-col-left, .result-col-right {
-            flex: 1;
+            flex: 1; 
             display: flex;
             flex-direction: column;
         }
         
+        /* === 인트로 스킵 시 1열(가운데 정렬) 꽉 차게 변경 === */
+        .result-wrapper.skipped {
+            justify-content: center; 
+        }
+        .result-wrapper.skipped .result-col-right {
+            display: none !important; /* 오른쪽 인트로 랭킹 숨김 */
+        }
+        .result-wrapper.skipped .result-col-left {
+            max-width: 600px; /* PC 환경에서 가로로 너무 찢어지지 않게 최대 너비 설정 */
+            width: 100%;
+            margin: 0 auto;
+        }
+        
         .result-section-title {
             text-align: left;
-            margin: 0 0 5px 0;
-            font-size: 12px;
+            margin: 0 0 12px 0;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: 0.5px;
-            height: 18px; 
-            display: flex;
-            align-items: center;
+            color: #ddd;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 6px;
         }
         
         .result-list-compact {
             display: flex;
             flex-direction: column;
-            gap: 2px; 
-            text-align: left;
+            gap: 6px; 
         }
         
-        /* 공통 항목 디자인 (글자색 통일) */
         .result-item {
-            background: rgba(255, 255, 255, 0.7); 
-            padding: 3px 8px; 
-            border-radius: 4px;
-            font-size: 11.5px; 
+            background: rgba(255,255,255,0.04); 
+            padding: 7px 10px; 
             display: flex;
             align-items: center;
-            transition: transform 0.2s, filter 0.2s;
+            border-radius: 6px; 
+            transition: transform 0.2s, background 0.2s;
+            box-sizing: border-box;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid transparent; /* 다른 티어들과 여백 맞추기 위한 기본값 */
         }
-        .result-item:hover {
-            transform: translateX(3px);
-            filter: brightness(1.02);
-            background: #fff;
-        }
+
         .rank-num {
-            width: 18px; 
-            margin-right: 6px;
-            font-size: 12px;
-            font-weight: 900;
-            color: #888; 
+            min-width: 26px; 
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: 800;
             display: inline-block;
+            text-align: right; 
+            font-variant-numeric: tabular-nums; 
         }
         .song-title {
-            font-weight: 600;
-            color: #222; 
+            font-size: 13px;
+            font-weight: 500; 
+            color: #ffffff; 
             word-break: keep-all;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis; 
+            white-space: normal; 
+            line-height: 1.35;
         }
 
-        /* 👑 티어별 디자인 (음영 및 왼쪽 테두리 포인트) */
-        
-        /* Tier 1 (1~10위) : 핑크 포인트 */
+        /* === 1~10위(티어1): 초록-분홍 그라데이션 적용 === */
         .tier-1 {
-            background: rgba(255, 175, 189, 0.15);
-            border-left: 3px solid #ff8fa3;
+            background: linear-gradient(90deg, rgba(82,216,158,0.12) 0%, rgba(247,107,225,0.04) 100%);
+            border-left: none; /* 솔리드 보더 제거 */
+            padding-left: 14px; /* 기존 패딩 10px + 사라진 보더 두께 4px 맞춤 */
         }
-        
-        /* Tier 2 (11~20위) : 스카이블루 포인트 */
-        .tier-2 {
-            background: rgba(121, 167, 211, 0.12);
-            border-left: 3px solid #79a7d3;
+        /* 그라데이션 왼쪽 바(Bar) */
+        .tier-1::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 4px;
+            background: linear-gradient(180deg, #52d89e 0%, #f76be1 100%);
         }
-        
-        /* Tier 3 (21~30위) : 피치(오렌지) 포인트 */
-        .tier-3 {
-            background: rgba(255, 195, 160, 0.15);
-            border-left: 3px solid #f2a679;
+        /* 그라데이션 숫자 색상 */
+        .tier-1 .rank-num { 
+            background: linear-gradient(180deg, #52d89e 0%, #f76be1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
         }
+        .tier-1 .song-title { font-weight: 700; color: #fff; } 
 
-        /* Tier 4 (31~45위) : 연한 녹색 포인트 */
-        .tier-4 {
-            background: rgba(160, 220, 160, 0.15);
-            border-left: 3px solid #99d999;
-        }
+        .tier-2 { border-left: 4px solid rgba(82,216,158,0.7); } 
+        .tier-2 .rank-num { color: #52d89e; }
 
-        /* Intro & Narration : 회색 포인트 */
-        .tier-intro {
-            background: rgba(210, 210, 210, 0.15);
-            border-left: 3px solid #cccccc;
-        }
+        .tier-3 { border-left: 4px solid rgba(247,107,225,0.7); } 
+        .tier-3 .rank-num { color: #f76be1; }
         
-        /* 좁은 화면(모바일 등) */
+        .tier-4 { border-left: 4px solid rgba(255,255,255,0.3); }
+        .tier-4 .rank-num { color: #aaa; }
+        
+        .tier-intro { 
+            border-left: 4px solid #888; 
+            background: rgba(0,0,0,0.2); 
+        }
+        .tier-intro .song-title { color: #ccc; font-weight: 500; }
+        .tier-intro .rank-num { color: #888; }
+        
         @media (max-width: 650px) {
             .result-wrapper {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .result-section-title {
-                height: auto; 
+                flex-direction: column; 
             }
         }
         
-        #start-screen, #battle-screen, #result-screen {
-            display: none;
-        }
-        .active {
-            display: block !important;
-        }
+        .action-buttons-wrap { display: flex; gap: 15px; margin-top: 30px; width: 100%; }
+        #start-screen, #battle-screen, #result-screen { display: none; }
+        .active { display: block !important; }
     </style>
 </head>
 <body>
 
+<!-- 팝업 모달창 (강제 중앙 정렬 완료) -->
+<div id="custom-modal">
+    <div class="modal-box">
+        <h3>PART 1 완료! ✨</h3>
+        <p>본 차트(Main Tracks) 평가가 완료되었습니다.<br>이어서 인트로 및 내레이션 트랙 순위도 평가하시겠습니까?</p>
+        <button class="modal-btn btn-yes" onclick="startPhase2FromModal()">네 (계속 평가하기)</button>
+        <button class="modal-btn btn-no" onclick="skipPhase2()">아니오 (결과 바로 보기)</button>
+    </div>
+</div>
+
 <div id="container">
-    <!-- 1. 시작 화면 -->
     <div id="start-screen" class="active">
+        <div class="theme-badge">MADE MY NIGHT EDITION</div>
         <h1><span class="logo-text">LE SSERAFIM</span></h1>
         <span class="subtitle">SONG SORTER</span>
         <span class="version-info">
-            * 일반 트랙(45 Tracks)과 인트로/내레이션(8 Tracks)을 분리하여 평가합니다.<br>
-            * includes up to [PUREFLOW pt.1] 
+            * 일반 트랙과 인트로/내레이션을 분리하여 평가합니다.<br>
+            * [Made My Night] 신곡 포함 (총 55곡)
         </span>
-        <button class="start-btn" onclick="startPhase(1)">START SORTING</button>
+        <button class="start-btn save-btn" style="width: 100%; margin-top: 15px;" onclick="startPhase(1)">START SORTING</button>
     </div>
 
-    <!-- 2. 배틀 화면 -->
     <div id="battle-screen">
-        <div id="phase-title">PART 1 : 일반 트랙</div>
+        <div id="phase-title">PART 1 : MAIN TRACKS</div>
         <div class="progress-wrapper">
             <div class="progress-text-box">
                 <span id="battle-count-text">BATTLE 1</span>
@@ -354,31 +433,29 @@
         </div>
     </div>
 
-    <!-- 3. 결과 화면 -->
     <div id="result-screen">
-        <h1 style="margin-bottom: 2px;">MY <span class="logo-text">LE SSERAFIM</span></h1>
-        <span class="version-info" style="margin-bottom: 8px;">Final Ranking</span>
+        <span class="subtitle" style="margin-bottom: 5px;">FINAL RANKING</span>
+        <h1 style="margin-bottom: 25px;"><span class="logo-text">LE SSERAFIM</span></h1>
         
-        <div class="result-wrapper">
-            <!-- 왼쪽: 일반 트랙 -->
+        <div class="result-wrapper" id="final-result-wrapper">
             <div class="result-col-left">
-                <div class="result-section-title" style="visibility: hidden;">&nbsp;</div>
+                <div class="result-section-title">✦ MAIN TRACKS</div>
                 <div id="main-result-list" class="result-list-compact"></div>
             </div>
-            
-            <!-- 오른쪽: 인트로 & 내레이션 트랙 -->
             <div class="result-col-right">
-                <div class="result-section-title" style="color: #79a7d3;">📖 인트로 & 내레이션</div>
+                <div class="result-section-title">▪ INTRO & NARRATION</div>
                 <div id="narration-result-list" class="result-list-compact"></div>
             </div>
         </div>
-
-        <button class="start-btn" style="margin-top: 20px; width: 100%;" onclick="location.reload()">TRY AGAIN</button>
+        
+        <div id="action-buttons-group" class="action-buttons-wrap">
+            <button class="start-btn" onclick="location.reload()">다시 하기 (Restart)</button>
+            <button class="start-btn save-btn" onclick="saveAsImage()">결과 이미지 저장 📸</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 53곡 전체 리스트
     const allSongs = [
         "The World Is My Oyster", "FEARLESS", "Blue Flame", "The Great Mermaid", "Sour Grapes", 
         "The Hydra", "ANTIFRAGILE", "Impurities", "No Celestial", "Good Parts (when the quality is bad but I am)", 
@@ -390,17 +467,15 @@
         "So Cynical (Badum)", "DIFFERENT", "Kawaii (Prod. Gen Hoshino)", "SPAGHETTI (feat. j-hope of BTS)", 
         "Pearlies (My oyster is the world)", "Pureflow", "BOOMPALA", "CELEBRATION", "Creatures", "iffy iffy", 
         "우리 어떻게 더 사귈 수 있을까 (Need Your Company)", "Sonder", "Saki (feat. Aliyah's Interlude)", 
-        "Irony", "Trust Exercise", "Liminal Space"
+        "Irony", "Trust Exercise", "Liminal Space", "Made my night", "AEIOU"
     ];
 
-    // 인트로 & 내레이션 트랙 8곡 분류
     const narrationTracks = [
         "The World Is My Oyster", "The Hydra", "Burn the Bridge", 
         "Good Bones", "Chasing Lightning", "Pureflow", 
         "Born Fire", "Liminal Space"
     ];
 
-    // 일반 트랙 45곡 분류
     const mainTracks = allSongs.filter(song => !narrationTracks.includes(song));
 
     let currentPhase = 1;
@@ -412,39 +487,40 @@
     let merged = [];
     let battleCount = 1;
     let history = [];
+    
     let totalProcessed = 0;
     let totalExpected = 0;
     
     let finalMainRanking = [];
     let finalNarrationRanking = [];
+    let isClickable = true;
+    let isIntroSkipped = false; 
 
     function startPhase(phaseNum) {
         currentPhase = phaseNum;
         itemsToSort = (currentPhase === 1) ? mainTracks : narrationTracks;
         
-        // 동률(무승부) 처리를 위해 각 곡을 배열 형태 [[곡명]] 로 감싸서 시작
         const shuffled = [...itemsToSort].sort(() => Math.random() - 0.5);
         lists = shuffled.map(item => [[item]]); 
         nextRoundLists = [];
-        battleCount = 1;
         history = []; 
         
-        const depth = Math.ceil(Math.log2(itemsToSort.length));
-        totalExpected = itemsToSort.length * depth;
+        totalExpected = itemsToSort.length * Math.ceil(Math.log2(itemsToSort.length));
         totalProcessed = 0;
+        battleCount = 1;
         
         document.getElementById("start-screen").classList.remove("active");
         document.getElementById("battle-screen").classList.add("active");
         
         const phaseTitle = document.getElementById("phase-title");
         if (currentPhase === 1) {
-            phaseTitle.innerText = "PART 1 : 일반 트랙";
-            phaseTitle.style.color = "#ff8fa3";
-            phaseTitle.style.background = "rgba(255, 175, 189, 0.15)";
+            phaseTitle.innerText = "PART 1 : MAIN TRACKS";
+            phaseTitle.style.background = "linear-gradient(90deg, #52d89e 0%, #f76be1 100%)";
+            phaseTitle.style.color = "#000";
         } else {
-            phaseTitle.innerText = "PART 2 : 인트로 & 내레이션";
-            phaseTitle.style.color = "#79a7d3";
-            phaseTitle.style.background = "rgba(121, 167, 211, 0.15)";
+            phaseTitle.innerText = "PART 2 : INTRO & NARRATION";
+            phaseTitle.style.background = "rgba(255,255,255,0.9)";
+            phaseTitle.style.color = "#000";
         }
         
         setupNextPair();
@@ -458,7 +534,13 @@
             if (nextRoundLists.length <= 1) {
                 if (currentPhase === 1) {
                     finalMainRanking = nextRoundLists[0] || [];
-                    startPhase(2); 
+                    
+                    document.getElementById("progress-percent").innerText = `100%`;
+                    document.getElementById("progress-fill").style.width = `100%`;
+                    
+                    setTimeout(() => {
+                        document.getElementById("custom-modal").classList.add("active");
+                    }, 300);
                 } else {
                     finalNarrationRanking = nextRoundLists[0] || [];
                     showFinalResults();
@@ -477,6 +559,17 @@
         showBattle();
     }
 
+    function startPhase2FromModal() {
+        document.getElementById("custom-modal").classList.remove("active");
+        startPhase(2);
+    }
+
+    function skipPhase2() {
+        document.getElementById("custom-modal").classList.remove("active");
+        isIntroSkipped = true; 
+        showFinalResults();
+    }
+
     function showBattle() {
         let percent = Math.floor((totalProcessed / totalExpected) * 100);
         if (percent > 99) percent = 99; 
@@ -485,8 +578,18 @@
         document.getElementById("progress-percent").innerText = `${percent}%`;
         document.getElementById("progress-fill").style.width = `${percent}%`;
         
-        document.getElementById("left-btn").innerHTML = leftList[leftIdx].join('<br>');
-        document.getElementById("right-btn").innerHTML = rightList[rightIdx].join('<br>');
+        const leftBtn = document.getElementById("left-btn");
+        const rightBtn = document.getElementById("right-btn");
+
+        leftBtn.classList.remove("fade-in");
+        rightBtn.classList.remove("fade-in");
+        void leftBtn.offsetWidth; 
+        void rightBtn.offsetWidth; 
+        leftBtn.classList.add("fade-in");
+        rightBtn.classList.add("fade-in");
+
+        leftBtn.innerHTML = leftList[leftIdx].join('<br>');
+        rightBtn.innerHTML = rightList[rightIdx].join('<br>');
         
         const undoBtn = document.getElementById("undo-btn");
         if (history.length === 0) {
@@ -503,7 +606,7 @@
     }
 
     function undo() {
-        if (history.length === 0) return;
+        if (history.length === 0 || !isClickable) return;
         const state = history.pop();
         lists = state.lists;
         nextRoundLists = state.nextRoundLists;
@@ -518,6 +621,10 @@
     }
 
     function makeChoice(choice) {
+        if (!isClickable) return;
+        isClickable = false;
+        setTimeout(() => { isClickable = true; }, 250);
+
         saveState();
         battleCount++;
 
@@ -557,7 +664,13 @@
         document.getElementById("battle-screen").classList.remove("active");
         document.getElementById("result-screen").classList.add("active");
         
-        // 1. 왼쪽: 일반 트랙 (티어별 음영 클래스 부여)
+        // 스킵 여부에 따라 클래스 추가 (1열 레이아웃 적용)
+        if (isIntroSkipped) {
+            document.getElementById("final-result-wrapper").classList.add("skipped");
+        } else {
+            document.getElementById("final-result-wrapper").classList.remove("skipped");
+        }
+
         const mainContainer = document.getElementById("main-result-list");
         mainContainer.innerHTML = "";
         let mainRank = 1;
@@ -567,7 +680,6 @@
                 const item = document.createElement("div");
                 item.className = "result-item";
                 
-                // 순위 구간에 따른 티어(Tier) 클래스 할당 (31위 이상은 tier-4 연한 녹색)
                 if (mainRank <= 10) item.classList.add("tier-1");
                 else if (mainRank <= 20) item.classList.add("tier-2");
                 else if (mainRank <= 30) item.classList.add("tier-3");
@@ -582,7 +694,7 @@
             mainRank += tiedGroup.length;
         });
 
-        // 2. 오른쪽: 인트로 & 내레이션
+        // 인트로 차트 렌더링 (스킵 시 렌더링만 하고 CSS로 가려짐)
         const narrationContainer = document.getElementById("narration-result-list");
         narrationContainer.innerHTML = "";
         let narRank = 1;
@@ -590,19 +702,44 @@
         finalNarrationRanking.forEach((tiedGroup) => {
             tiedGroup.forEach((song) => {
                 const item = document.createElement("div");
-                item.className = "result-item";
-                
-                // 내레이션 트랙은 모두 회색 포인트 (tier-intro)
-                item.classList.add("tier-intro");
-                
+                item.className = "result-item tier-intro";
                 item.innerHTML = `
-                    <span class="rank-num">${narRank}</span>
+                    <span class="rank-num" style="color: #666;">${narRank}</span>
                     <span class="song-title">${song}</span>
                 `;
                 narrationContainer.appendChild(item);
             });
             narRank += tiedGroup.length;
         });
+    }
+
+    function saveAsImage() {
+        window.scrollTo(0, 0); 
+        
+        const container = document.getElementById('container');
+        const actionBtns = document.getElementById('action-buttons-group');
+        
+        actionBtns.style.display = 'none'; 
+        
+        setTimeout(() => {
+            html2canvas(container, {
+                backgroundColor: '#111216', 
+                scale: 2,
+                useCORS: true,
+                scrollY: 0 
+            }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'LE_SSERAFIM_My_Ranking.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                actionBtns.style.display = 'flex'; 
+            }).catch(err => {
+                console.error("이미지 렌더링 실패:", err);
+                alert("이미지 저장 중 오류가 발생했습니다.");
+                actionBtns.style.display = 'flex';
+            });
+        }, 100); 
     }
 </script>
 </body>
