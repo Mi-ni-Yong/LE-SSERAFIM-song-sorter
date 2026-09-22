@@ -38,20 +38,20 @@
         #custom-modal {
             display: none;
             position: fixed;
-            z-index: 9999; /* 다른 모든 요소보다 최상단에 배치 */
-            inset: 0; /* top: 0, left: 0, right: 0, bottom: 0 완벽 커버 */
+            z-index: 9999;
+            inset: 0; 
             width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(5px);
         }
         #custom-modal.active {
-            display: block; /* flex 대신 block을 사용하여 절대 좌표 적용 */
+            display: block; 
         }
         .modal-box {
             position: absolute;
-            top: 15vh; /* 화면 상단에서 15% 띄움 */
+            top: 15vh; 
             left: 50%;
-            transform: translateX(-50%); /* 가로 완벽하게 정중앙 고정 */
+            transform: translateX(-50%); 
             margin: 0; 
             background: #1a1b20;
             padding: 25px 20px;
@@ -280,10 +280,10 @@
             justify-content: center; 
         }
         .result-wrapper.skipped .result-col-right {
-            display: none !important; /* 오른쪽 인트로 랭킹 숨김 */
+            display: none !important; 
         }
         .result-wrapper.skipped .result-col-left {
-            max-width: 600px; /* PC 환경에서 가로로 너무 찢어지지 않게 최대 너비 설정 */
+            max-width: 600px; 
             width: 100%;
             margin: 0 auto;
         }
@@ -317,7 +317,7 @@
             width: 100%;
             position: relative;
             overflow: hidden;
-            border-left: 4px solid transparent; /* 다른 티어들과 여백 맞추기 위한 기본값 */
+            border-left: 4px solid transparent; 
         }
 
         .rank-num {
@@ -338,24 +338,24 @@
             line-height: 1.35;
         }
 
-        /* === 1~10위(티어1): 초록-분홍 그라데이션 적용 === */
+        /* === 1~10위(티어1): 뱃지형 그라데이션으로 변경 (캡처 오류 방지) === */
         .tier-1 {
             background: linear-gradient(90deg, rgba(82,216,158,0.12) 0%, rgba(247,107,225,0.04) 100%);
-            border-left: none; /* 솔리드 보더 제거 */
-            padding-left: 14px; /* 기존 패딩 10px + 사라진 보더 두께 4px 맞춤 */
+            border-left: none; 
+            padding-left: 14px; 
         }
-        /* 그라데이션 왼쪽 바(Bar) */
         .tier-1::before {
             content: "";
             position: absolute;
             left: 0; top: 0; bottom: 0; width: 4px;
             background: linear-gradient(180deg, #52d89e 0%, #f76be1 100%);
         }
-        /* 그라데이션 숫자 색상 */
         .tier-1 .rank-num { 
-            background: linear-gradient(180deg, #52d89e 0%, #f76be1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background: linear-gradient(135deg, #52d89e 0%, #f76be1 100%);
+            color: #111216; /* 뱃지 형태를 위해 글자는 진한 색으로 */
+            border-radius: 4px;
+            padding: 2px 0;
+            text-align: center;
             font-weight: 900;
         }
         .tier-1 .song-title { font-weight: 700; color: #fff; } 
@@ -389,7 +389,6 @@
 </head>
 <body>
 
-<!-- 팝업 모달창 (강제 중앙 정렬 완료) -->
 <div id="custom-modal">
     <div class="modal-box">
         <h3>PART 1 완료! ✨</h3>
@@ -664,7 +663,6 @@
         document.getElementById("battle-screen").classList.remove("active");
         document.getElementById("result-screen").classList.add("active");
         
-        // 스킵 여부에 따라 클래스 추가 (1열 레이아웃 적용)
         if (isIntroSkipped) {
             document.getElementById("final-result-wrapper").classList.add("skipped");
         } else {
@@ -694,7 +692,6 @@
             mainRank += tiedGroup.length;
         });
 
-        // 인트로 차트 렌더링 (스킵 시 렌더링만 하고 CSS로 가려짐)
         const narrationContainer = document.getElementById("narration-result-list");
         narrationContainer.innerHTML = "";
         let narRank = 1;
