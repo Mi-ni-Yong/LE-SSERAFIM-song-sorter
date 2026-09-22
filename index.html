@@ -338,27 +338,36 @@
             line-height: 1.35;
         }
 
-        /* === 1~10위(티어1): 뱃지형 그라데이션으로 변경 (캡처 오류 방지) === */
+        /* === 1~10위(티어1): 초록-분홍 그라데이션 적용 === */
         .tier-1 {
             background: linear-gradient(90deg, rgba(82,216,158,0.12) 0%, rgba(247,107,225,0.04) 100%);
             border-left: none; 
             padding-left: 14px; 
         }
+        
         .tier-1::before {
             content: "";
             position: absolute;
             left: 0; top: 0; bottom: 0; width: 4px;
             background: linear-gradient(180deg, #52d89e 0%, #f76be1 100%);
         }
+        
+        /* 웹 브라우저용 텍스트 그라데이션 */
         .tier-1 .rank-num { 
-            background: linear-gradient(135deg, #52d89e 0%, #f76be1 100%);
-            color: #111216; /* 뱃지 형태를 위해 글자는 진한 색으로 */
-            border-radius: 4px;
-            padding: 2px 0;
-            text-align: center;
+            background: linear-gradient(180deg, #52d89e 0%, #f76be1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             font-weight: 900;
         }
         .tier-1 .song-title { font-weight: 700; color: #fff; } 
+
+        /* 🔥 이미지 캡처(html2canvas) 시 네모 블록 버그 방지 코드 🔥 */
+        .capture-mode .tier-1 .rank-num {
+            background: transparent !important;
+            -webkit-background-clip: initial !important;
+            -webkit-text-fill-color: #52d89e !important;
+            color: #52d89e !important; /* 그라데이션 대신 민트색 단색으로 렌더링 */
+        }
 
         .tier-2 { border-left: 4px solid rgba(82,216,158,0.7); } 
         .tier-2 .rank-num { color: #52d89e; }
@@ -389,6 +398,7 @@
 </head>
 <body>
 
+<!-- 팝업 모달창 -->
 <div id="custom-modal">
     <div class="modal-box">
         <h3>PART 1 완료! ✨</h3>
@@ -723,7 +733,11 @@
                 backgroundColor: '#111216', 
                 scale: 2,
                 useCORS: true,
-                scrollY: 0 
+                scrollY: 0,
+                onclone: function (clonedDoc) {
+                    // html2canvas 복제본에만 capture-mode 클래스를 추가하여 네모 블록 버그 해결 (화면 깜빡임 없음)
+                    clonedDoc.getElementById('container').classList.add('capture-mode');
+                }
             }).then(canvas => {
                 let link = document.createElement('a');
                 link.download = 'LE_SSERAFIM_My_Ranking.png';
